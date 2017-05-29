@@ -31,6 +31,8 @@ else
     limegreen="$fg[green]"
 fi
 
+
+
 # Globals
 KEL_WHALE="🐳"
 KEL_CLEAN="%{$reset_color%}"
@@ -40,7 +42,7 @@ KEL_SUFFIX="%{$orange%}λ$KEL_CLEAN "
 KEL_TIME="[%*]"
 
 KEL_HOST=""
-KEL_SEGMENT="\ue0b0"
+KEL_SEGMENT=" "
 KEL_ARROW=""
 
 KEL_JOBS_JOB="⚙️"
@@ -58,6 +60,15 @@ KEL_GIT_UNMERGED="🔴"
 KEL_GIT_DIVERGED="↪️"
 KEL_GIT_STASHED="📦"
 
+# Set the icons based on the font
+function icon_set() {
+    if [[ $(defaults read com.googlecode.iterm2 | grep "Normal Font" | grep "NerdFont") ]]; then
+        KEL_WHALE="\ue7b0"
+        KEL_SEGMENT="\ue0c0"
+        #KEL_JOBS_JOB="\ue
+    fi
+}
+
 # Segments
 CURRENT_BG='NONE'
 PRIMARY_FG=""
@@ -73,19 +84,19 @@ prompt_segment() {
   else
     bg="%k"
   fi
-  
+
   if [[ -n $2 ]]; then
     fg="%F{$2}"
   else
     fg="%f"
   fi
-  
+
   if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
       print -n "%{$bg%F{$CURRENT_BG}%}$KEL_SEGMENT%{$fg%}"
   else
     print -n "%{$bg%}%{$fg%}"
   fi
-  
+
   CURRENT_BG=$1
   if [[ -n $3 ]]; then
       print -n " $3 "
@@ -99,7 +110,7 @@ end_prompt() {
   else
     print -n "%{%k%}"
   fi
-  
+
   print -n "%{%f%} "
   CURRENT_BG=''
 }
@@ -111,7 +122,7 @@ extra_segment() {
     else
       bg="%k"
     fi
-    
+
     print -n "%{$bg%F{$1}%}$KEL_SEGMENT"
 }
 
@@ -119,8 +130,8 @@ extra_segment() {
 keloran_get_docker_host() {
     local _docker=$DOCKER_HOST
     local _ldocker="local"
-    local _docker_local="${KEL_WHALE}  %{$fg_bold[cyan]%}$_ldocker"
-    local _docker_remote="${KEL_WHALE}  %{$fg_bold[red]%}$_docker"
+    local _docker_local="%{$fg_bold[cyan]%}${KEL_WHALE} $_ldocker"
+    local _docker_remote="%{$fg_bold[red]%}${KEL_WHALE} $_docker"
     local _docker_status="$_docker_remote"
 
     # No Docker at all
@@ -221,27 +232,32 @@ keloran_git_prompt() {
     fi
     _result="$_result"
   fi
-  
+
   if [[ -n $_result ]]; then
       prompt_segment 93 default $_result
   fi
 }
 
-# Spaces 
+# Spaces
 keloran_get_space() {
   local STR=$1$2
   local zero='%([BSUbfksu]|([FB]|){*})'
   local LENGTH=${#${(S%%)STR//$~zero/}}
   local SPACES=""
   (( LENGTH = ${COLUMNS} - $LENGTH - 1))
-  
+
+  for i in {0..$LENGTH}
+  do
+    SPACES="$SPACES "
+  done
+
   echo $SPACES
 }
 
 # General
 keloran_get_machine() {
   prompt_segment 161 default "%m"
-  
+
   local user=`whoami`
   if [[ "$user" != "$DEFAULT_USER" || -n "$SSH_CONNECTION" ]]; then
    prompt_segment 124 default " %(!.%{%F{yellow}%}.)$user"
@@ -266,7 +282,7 @@ keloran_get_location() {
 keloran_get_jobs() {
   local symbols
   symbols=()
-  
+
   if [[ $RETVAL -ne 0 ]]; then
     symbols+="%{%F{red}%}$KEL_JOBS_CROSS"
   fi
@@ -274,11 +290,11 @@ keloran_get_jobs() {
   if [[ $UID -eq 0 ]]; then
     symbols+="%{%F{yellow}%}$KEL_JOBS_LIGHTNING"
   fi
-  
+
   if [[ $(jobs -l | wc -l) -gt 0 ]]; then
     symbols+="%{%F{cyan}%}$KEL_JOBS_JOB"
   fi
-  
+
   if [[ -n "$symbols" ]]; then
     prompt_segment $PRIMARY_FG default " $symbols "
   fi
@@ -310,13 +326,14 @@ keloran_remote() {
 
 function keloran_precmd {
     _SPACES=`keloran_get_space`
-    
+
     setopt prompt_subst
     PROMPT='$(keloran_nice_exit)$(keloran_command)$KEL_CLEAN'
-    RPROMPT='$(nvm_prompt_info) $(keloran_get_docker_host)$(keloran_remote)[%*]'
+    RPROMPT='$(nvm_prompt_info)$(keloran_get_docker_host)$(keloran_remote)[%*]'
 }
 
 kel_setup() {
+  icon_set
   autoload -U add-zsh-hook
   add-zsh-hook precmd keloran_precmd
 }

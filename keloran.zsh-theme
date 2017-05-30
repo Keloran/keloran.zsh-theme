@@ -42,7 +42,7 @@ KEL_SUFFIX="%{$orange%}λ$KEL_CLEAN "
 KEL_TIME="[%*]"
 
 KEL_HOST=""
-KEL_SEGMENT=" "
+KEL_SEGMENT=">"
 KEL_ARROW=""
 
 KEL_JOBS_JOB="⚙️"
@@ -65,7 +65,18 @@ function icon_set() {
     if [[ $(defaults read com.googlecode.iterm2 | grep "Normal Font" | grep "NerdFont") ]]; then
         KEL_WHALE="\ue7b0"
         KEL_SEGMENT="\ue0c0"
-        #KEL_JOBS_JOB="\ue
+        KEL_JOBS_JOB="\uf1d1"
+        KEL_JOBS_LIGHTNING="\uf135"
+        KEL_JOBS_CROSS="\ue752"
+        KEL_GIT_UNSTAGED="\uf06a"
+        KEL_GIT_UNTRACKED="\uf059"
+        KEL_GIT_STAGED="\uf05a"
+        KEL_GIT_BEHIND="\uf060"
+        KEL_GIT_AHEAD="\uf061"
+        KEL_GIT_CLEAN="\uf058"
+        KEL_GIT_UNMERGED="\uf057"
+        KEL_GIT_DIVERGED="\ue727"
+        KEL_GIT_STASHED="\ue79b"
     fi
 }
 

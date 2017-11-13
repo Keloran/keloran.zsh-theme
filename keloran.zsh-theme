@@ -281,7 +281,7 @@ keloran_get_location() {
         pwd_root=$pwd_root:h
     done
     if [[ $pwd_root = / ]]; then
-        unset $pwd_root
+        unset pwd_root
         prompt_short_dir=%~
     else
         parent=${pwd_root%\/*}

@@ -62,7 +62,25 @@ KEL_GIT_STASHED="📦"
 
 # Set the icons based on the font
 function icon_set() {
-    if [[ $(defaults read com.googlecode.iterm2 | grep "Normal Font" | grep "NerdFont") ]]; then
+    # Nerd Font
+    local NERD_FONT=false
+
+    if [[ -e "/Applications/iTerm2.app" ]]; then
+        if [[ $(defaults read com.googlecode.iterm2 | grep "Normal Font" | grep "NerdFont") ]]; then
+            NERD_FONT=true
+        fi
+    fi
+
+    if [[ -e "/Applications/Hyper.app" ]]; then
+        local whoDir="/Users/$(whoami)"
+
+        if [[ $(cat "${whoDir}/.hyper.js" | grep "Nerd Font") ]]; then
+            NERD_FONT=true
+        fi
+    fi
+
+
+    if [[ $NERD_FONT ]]; then
         KEL_WHALE="\ue7b0"
         KEL_SEGMENT="\ue0c0"
         KEL_JOBS_JOB="\uf1d1"
@@ -160,66 +178,73 @@ keloran_get_docker_host() {
 
 # GIT
 keloran_git_status() {
-  _STATUS=""
-  _INDEX=$(command git status --porcelain 2> /dev/null)
+  local GIT_INSTALLED=true
+  if [[ $(which git | grep "not found") ]]; then
+    GIT_INSTALLED=false
+  fi
+
+  local _STATUS=""
+  local _INDEX=$(command git status --porcelain 2> /dev/null)
 
   local _staged=false
   local _unstaged=false
   local _unmerged=false
 
-  # Files
-  if [[ -n $_INDEX ]]; then
-    if $(echo "$_INDEX" | command grep -q '^[AMRD]. '); then
-        _STATUS="$_STATUS$KEL_GIT_STAGED"
-        _staged=true
-    fi
+  if [[ $GIT_INSTALLED ]]; then
+    # Files
+    if [[ -n $_INDEX ]]; then
+        if $(echo "$_INDEX" | command grep -q '^[AMRD]. '); then
+            _STATUS="$_STATUS$KEL_GIT_STAGED"
+            _staged=true
+        fi
 
-    if $(echo "$_INDEX" | command grep -q '^.[MTD] '); then
-      _unstaged=true
-      if [[ _staged ]]; then
-        _STATUS="$_STATUS $KEL_GIT_UNSTAGED"
+        if $(echo "$_INDEX" | command grep -q '^.[MTD] '); then
+          _unstaged=true
+          if [[ _staged ]]; then
+            _STATUS="$_STATUS $KEL_GIT_UNSTAGED"
+          else
+            _STATUS="$_STATUS$KEL_GIT_UNSTAGED"
+          fi
+        fi
+
+        if $(echo "$_INDEX" | command grep -q '^UU '); then
+          _unmerged=true
+
+          if [[ _unstaged ]]; then
+            _STATUS="$_STATUS $KEL_GIT_UNMERGED"
+          else
+            _STATUS="$_STATUS$KEL_GIT_UNMERGED"
+          fi
+        fi
+
+        if $(echo "$_INDEX" | command grep -q -E '^\?\? '); then
+          if [[ _unmerged ]]; then
+            _STATUS="$_STATUS $KEL_GIT_UNTRACKED"
+          else
+            _STATUS="$_STATUS$KEL_GIT_UNTRACKED"
+          fi
+        fi
       else
-        _STATUS="$_STATUS$KEL_GIT_UNSTAGED"
+          _STATUS="$_STATUS$KEL_GIT_CLEAN"
       fi
-    fi
 
-    if $(echo "$_INDEX" | command grep -q '^UU '); then
-      _unmerged=true
-
-      if [[ _unstaged ]]; then
-        _STATUS="$_STATUS $KEL_GIT_UNMERGED"
-      else
-        _STATUS="$_STATUS$KEL_GIT_UNMERGED"
+      # Repo
+      _INDEX=$(command git status --porcelain -b 2> /dev/null)
+      if $(echo "$_INDEX" | command grep -q '^## .*ahead'); then
+          _STATUS="$_STATUS $KEL_GIT_AHEAD"
       fi
-    fi
 
-    if $(echo "$_INDEX" | command grep -q -E '^\?\? '); then
-      if [[ _unmerged ]]; then
-        _STATUS="$_STATUS $KEL_GIT_UNTRACKED"
-      else
-        _STATUS="$_STATUS$KEL_GIT_UNTRACKED"
+      if $(echo "$_INDEX" | command grep -q '^## .*behind'); then
+          _STATUS="$_STATUS $KEL_GIT_BEHIND"
       fi
-    fi
-  else
-      _STATUS="$_STATUS$KEL_GIT_CLEAN"
-  fi
 
-  # Repo
-  _INDEX=$(command git status --porcelain -b 2> /dev/null)
-  if $(echo "$_INDEX" | command grep -q '^## .*ahead'); then
-      _STATUS="$_STATUS $KEL_GIT_AHEAD"
-  fi
+      if $(echo "$_INDEX" | command grep -q '^## .*diverged'); then
+          _STATUS="$_STATUS $KEL_GIT_DIVERGED"
+      fi
 
-  if $(echo "$_INDEX" | command grep -q '^## .*behind'); then
-      _STATUS="$_STATUS $KEL_GIT_BEHIND"
-  fi
-
-  if $(echo "$_INDEX" | command grep -q '^## .*diverged'); then
-      _STATUS="$_STATUS $KEL_GIT_DIVERGED"
-  fi
-
-  if $(command git rev-parse --verify refs/stash &> /dev/null); then
-      _STATUS="$_STATUS $KEL_GIT_STASHED"
+      if $(command git rev-parse --verify refs/stash &> /dev/null); then
+          _STATUS="$_STATUS $KEL_GIT_STASHED"
+      fi
   fi
 
   echo " $_STATUS"
@@ -269,7 +294,7 @@ keloran_get_space() {
 keloran_get_machine() {
   prompt_segment 161 default "%m"
 
-  local user=`whoami`
+  local user=$(whoami)
   if [[ "$user" != "$DEFAULT_USER" || -n "$SSH_CONNECTION" ]]; then
    prompt_segment 124 default " %(!.%{%F{yellow}%}.)$user"
  fi

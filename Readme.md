@@ -4,6 +4,8 @@ ZSH Theme that includes a few features from other themes
 
 ## Requirments
 [Nice Exit Code](https://github.com/bric3/nice-exit-code)
+GIT
+[Nerd Font](https://nerdfonts.com)
 
 ## Screenshot
 ![Screenshot](Screenshot.png)

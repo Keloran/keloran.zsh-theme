@@ -1,11 +1,11 @@
 # Keloran Theme
 
-ZSH Theme that includes a few features from other themes
+ZSH Theme that includes a few features from other themes, and has a random changing prompt for each command
 
 ## Requirments
-[Nice Exit Code](https://github.com/bric3/nice-exit-code)
-GIT
-[Nerd Font](https://nerdfonts.com)
+- [Nice Exit Code](https://github.com/bric3/nice-exit-code)
+- GIT
+- [Nerd Font](https://nerdfonts.com)
 
 ## Screenshot
 ![Screenshot](Screenshot.png)

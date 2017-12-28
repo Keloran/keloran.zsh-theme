@@ -82,7 +82,17 @@ function icon_set() {
 
     if [[ $NERD_FONT ]]; then
         KEL_WHALE="\ue7b0"
-        KEL_SEGMENT="\ue0c0"
+
+        KEL_SEGMENT_FLAMES="\ue0c0"
+        KEL_SEGMENT_LITTLE_BLOCKS="\ue0c4"
+        KEL_SEGMENT_BIG_BLOCKS="\ue0c6"
+        KEL_SEGMENT_SPIKES="\ue0c8"
+        KEL_SEGMENT_LEGO="\ue0ce"
+        KEL_SEGMENT_HEX="\ue0cc"
+        KEL_SEGMENT_FILED_CURVE="\ue0b4"
+        KEL_SEGMENT_FILED_ARROW="\ue0b0"
+        KEL_SEGMENT=$KEL_SEGMENT_FLAMES
+
         KEL_JOBS_JOB="\uf1d1"
         KEL_JOBS_LIGHTNING="\uf135"
         KEL_JOBS_CROSS="\ue752"
@@ -107,7 +117,7 @@ fi
 
 # Begin Segment
 prompt_segment() {
-  local bg fg
+  local bg fg segment randnum
   if [[ -n $1 ]]; then
     bg="%K{$1}"
   else
@@ -120,8 +130,36 @@ prompt_segment() {
     fg="%f"
   fi
 
+  randnum=$(((RANDOM % 7) + 1))
+  case $randnum in
+    1)
+      segment=$KEL_SEGMENT_FLAMES
+      ;;
+    2)
+      segment=$KEL_SEGMENT_LITTLE_BLOCKS
+      ;;
+    3)
+      segment=$KEL_SEGMENT_BIG_BLOCKS
+      ;;
+    4)
+      segment=$KEL_SEGMENT_SPIKES
+      ;;
+    5)
+      segment=$KEL_SEGMENT_HEX
+      ;;
+    6)
+      segment=$KEL_SEGMENT_FILED_CURVE
+      ;;
+    7)
+      segment=$KEL_SEGMENT_FILED_ARROW
+      ;;
+    *)
+      segment=$KEL_SEGMENT
+      ;;
+  esac
+
   if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
-      print -n "%{$bg%F{$CURRENT_BG}%}$KEL_SEGMENT%{$fg%}"
+      print -n "%{$bg%F{$CURRENT_BG}%}$segment%{$fg%}"
   else
     print -n "%{$bg%}%{$fg%}"
   fi
@@ -134,20 +172,51 @@ prompt_segment() {
 
 # End Segment
 end_prompt() {
+  local segment randnum
+
+  randnum=$(((RANDOM % 7) + 1))
+  case $randnum in
+    1)
+      segment=$KEL_SEGMENT_FLAMES
+      ;;
+    2)
+      segment=$KEL_SEGMENT_LITTLE_BLOCKS
+      ;;
+    3)
+      segment=$KEL_SEGMENT_BIG_BLOCKS
+      ;;
+    4)
+      segment=$KEL_SEGMENT_SPIKES
+      ;;
+    5)
+      segment=$KEL_SEGMENT_HEX
+      ;;
+    6)
+      segment=$KEL_SEGMENT_FILED_CURVE
+      ;;
+    7)
+      segment=$KEL_SEGMENT_FILED_ARROW
+      ;;
+    *)
+      segment=$KEL_SEGMENT
+      ;;
+  esac
+
   if [[ -n $CURRENT_BG ]]; then
-    print -n "%{%k%F{$CURRENT_BG}%}$KEL_SEGMENT"
+    print -n "%{%k%F{$CURRENT_BG}%}$segment"
   else
-    print -n "%{%k%}"
+    print -n "%{%k%}$segment"
   fi
 
   print -n "%{%f%} "
+
   CURRENT_BG=''
 }
 
 extra_segment() {
     local bg
     if [[ -n $1 ]]; then
-      bg="%K{161}"
+      bg="%K{99}"
     else
       bg="%k"
     fi
@@ -292,11 +361,11 @@ keloran_get_space() {
 
 # General
 keloran_get_machine() {
-  prompt_segment 161 default "%m"
+  prompt_segment 8 default "%m"
 
   local user=$(whoami)
   if [[ "$user" != "$DEFAULT_USER" || -n "$SSH_CONNECTION" ]]; then
-   prompt_segment 124 default " %(!.%{%F{yellow}%}.)$user"
+   prompt_segment 56 default " %(!.%{%F{yellow}%}.)$user"
  fi
 }
 
@@ -312,7 +381,7 @@ keloran_get_location() {
         parent=${pwd_root%\/*}
         prompt_short_dir=${PWD#$parent/}
     fi
-    prompt_segment 57 default $prompt_short_dir
+    prompt_segment 66 default $prompt_short_dir
 }
 
 keloran_get_jobs() {

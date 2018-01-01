@@ -406,10 +406,18 @@ keloran_get_jobs() {
 }
 
 keloran_nice_exit() {
-    local _fail=$(nice_exit_code)
-    if [[ -n "${_fail}" ]]; then
-        prompt_segment 99 default $_fail
-        extra_segment 99
+    local _fail
+    if [[ $(type -f nice_exit | grep "not found") ]]; then
+        _fail=false
+    else
+        _fail=$(nice_exit_code)
+    fi
+
+    if [[ -z $_fail ]]; then
+        if [[ -n "${_fail}" ]]; then
+            prompt_segment 99 default $_fail
+            extra_segment 99
+        fi
     fi
 }
 
